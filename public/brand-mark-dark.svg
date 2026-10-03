@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Noirly Pulse mark">
   <title>Noirly Pulse — monochrome</title>
-  <!-- Default tint for standalone use. Delete this rule to inherit color from the parent. -->
+  <desc>A chat bubble carrying a heartbeat: conversations that are live.</desc>
+  <!-- Default tint for standalone use. Delete this rule to inherit color from the parent.
+       Plain currentColor shapes only (no masks/clipPaths) so theming code can recolor it safely. -->
   <style>svg { color: #C9A44A; }</style>
-  <!-- Broken rings. Weight decays outward now that opacity can't. -->
-  <g fill="none" stroke="currentColor" stroke-linecap="round" pathLength="100">
-    <circle cx="512" cy="512" r="158" stroke-width="46"
-            stroke-dasharray="83 17" transform="rotate(-118 512 512)"/>
-    <circle cx="512" cy="512" r="234" stroke-width="30"
-            stroke-dasharray="79 21" transform="rotate(-74 512 512)"/>
-    <circle cx="512" cy="512" r="306" stroke-width="18"
-            stroke-dasharray="75 25" transform="rotate(-30 512 512)"/>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <!-- The conversation -->
+    <path stroke-width="56"
+          d="M316 200 H708 A140 140 0 0 1 848 340 V572 A140 140 0 0 1 708 712 H452 L292 836 L304 712
+             A140 140 0 0 1 176 572 V340 A140 140 0 0 1 316 200 Z"/>
+    <!-- The heartbeat: presence, in realtime -->
+    <path stroke-width="52" d="M272 462 H404 L452 352 L524 592 L584 412 L616 462 H752"/>
   </g>
-  <!-- Presence core -->
-  <circle cx="512" cy="512" r="76" fill="currentColor"/>
 </svg>
