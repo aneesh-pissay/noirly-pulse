@@ -906,7 +906,7 @@ export async function sfuConnectTransportForUser(
   dtlsParameters: SfuDtlsParameters,
 ): Promise<void> {
   await requireJoinedParticipant(userId, callId);
-  await connectSfuTransport(callId, transportId, dtlsParameters);
+  await connectSfuTransport(callId, transportId, dtlsParameters, userId);
 }
 
 export async function sfuProduceForUser(
@@ -938,7 +938,7 @@ export async function sfuResumeConsumerForUser(
   consumerId: string,
 ): Promise<void> {
   await requireJoinedParticipant(userId, callId);
-  await resumeSfuConsumer(callId, consumerId);
+  await resumeSfuConsumer(callId, consumerId, userId);
 }
 
 export async function sfuSetConsumerLayersForUser(
@@ -948,5 +948,5 @@ export async function sfuSetConsumerLayersForUser(
   layers: { spatialLayer: number; temporalLayer?: number },
 ): Promise<void> {
   await requireJoinedParticipant(userId, callId);
-  await setSfuConsumerLayers(callId, consumerId, layers);
+  await setSfuConsumerLayers(callId, consumerId, layers, userId);
 }

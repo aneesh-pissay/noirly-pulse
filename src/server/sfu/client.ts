@@ -109,12 +109,14 @@ export async function connectSfuTransport(
   callId: string,
   transportId: string,
   dtlsParameters: SfuDtlsParameters,
+  userId: string,
 ): Promise<void> {
   await sfuFetch<{ ok: boolean }>(
     `/internal/rooms/${encodeURIComponent(callId)}/transports/${encodeURIComponent(transportId)}/connect`,
     {
       method: "POST",
-      body: JSON.stringify({ dtlsParameters }),
+      // The SFU checks the transport is this user's.
+      body: JSON.stringify({ dtlsParameters, userId }),
     },
   );
 }
@@ -155,10 +157,10 @@ export function sfuConsume(
   );
 }
 
-export async function resumeSfuConsumer(callId: string, consumerId: string): Promise<void> {
+export async function resumeSfuConsumer(callId: string, consumerId: string, userId: string): Promise<void> {
   await sfuFetch<{ ok: boolean }>(
     `/internal/rooms/${encodeURIComponent(callId)}/consumers/${encodeURIComponent(consumerId)}/resume`,
-    { method: "POST" },
+    { method: "POST", body: JSON.stringify({ userId }) },
   );
 }
 
@@ -166,12 +168,13 @@ export async function setSfuConsumerLayers(
   callId: string,
   consumerId: string,
   layers: { spatialLayer: number; temporalLayer?: number },
+  userId: string,
 ): Promise<void> {
   await sfuFetch<{ ok: boolean }>(
     `/internal/rooms/${encodeURIComponent(callId)}/consumers/${encodeURIComponent(consumerId)}/layers`,
     {
       method: "POST",
-      body: JSON.stringify(layers),
+      body: JSON.stringify({ ...layers, userId }),
     },
   );
 }

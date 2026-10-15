@@ -1,8 +1,12 @@
+import { safeLocalPath } from "@/src/lib/safe-path";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { guardApiRequest } from "@/src/server/security/api-guard";
 import { isLastScopePath, LAST_SCOPE_COOKIE } from "@/src/lib/last-scope";
 
-export const proxy = auth((request) => {
+export const proxy = auth(async (request) => {
+  const blocked = await guardApiRequest(request);
+  if (blocked) return blocked;
   const { pathname } = request.nextUrl;
   const isLanding = pathname === "/";
   const isLogin = pathname === "/login";
@@ -34,8 +38,9 @@ export const proxy = auth((request) => {
 
   if (request.auth && isLogin) {
     const next = request.nextUrl.searchParams.get("next");
-    if (next && next.startsWith("/") && !next.startsWith("//") && next !== "/inbox") {
-      return NextResponse.redirect(new URL(next, request.nextUrl.origin));
+    const safeNext = safeLocalPath(next, "");
+    if (safeNext && next !== "/inbox") {
+      return NextResponse.redirect(new URL(safeNext, request.nextUrl.origin));
     }
     return NextResponse.redirect(new URL(home, request.nextUrl.origin));
   }

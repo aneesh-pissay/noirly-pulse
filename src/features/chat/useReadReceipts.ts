@@ -33,7 +33,7 @@ export function useReadReceipts(conversationId: string) {
         void fetch(`/api/conversations/${conversationId}/read`, {
           method: "PUT",
           keepalive: true,
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Noirly-CSRF": "1" },
           body: JSON.stringify({ lastReadMessageId: id }),
         }).catch(() => undefined);
         return;

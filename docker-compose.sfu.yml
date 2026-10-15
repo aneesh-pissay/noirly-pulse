@@ -10,7 +10,8 @@ services:
       context: ../noirly-sfu
       dockerfile: Dockerfile
     ports:
-      - "4002:4002"
+      # Internal API: this machine only. Browsers use the RTC ports below.
+      - "127.0.0.1:4002:4002"
       - "40000-40100:40000-40100/udp"
     environment:
       PORT: "4002"

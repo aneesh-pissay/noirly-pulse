@@ -1,5 +1,7 @@
 "use client";
 
+import { safeLocalPath } from "@/src/lib/safe-path";
+
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@noirly-dev/ui";
@@ -12,7 +14,7 @@ const IDENTITY_URL =
   process.env.NEXT_PUBLIC_IDENTITY_URL ?? "http://localhost:3000";
 
 function safeNext(value: string): string {
-  return value.startsWith("/") && !value.startsWith("//") ? value : "/inbox";
+  return safeLocalPath(value, "/inbox");
 }
 
 function readAuthPayload(): { next?: string } | null {

@@ -1,12 +1,14 @@
 "use client";
 
+import { safeLocalPath } from "@/src/lib/safe-path";
+
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { PulseBusyScreen } from "@/src/components/PulseBusyScreen";
 
 function safeNext(value: string | null): string {
-  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/inbox";
+  return safeLocalPath(value, "/inbox");
 }
 
 function LoginPopupInner() {

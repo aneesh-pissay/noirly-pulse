@@ -1,15 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Noirly Pulse mark">
-  <title>Noirly Pulse — monochrome</title>
+  <title>Noirly Pulse — favicon, light</title>
   <desc>A chat bubble carrying a heartbeat: conversations that are live.</desc>
   <!-- Default tint for standalone use. Delete this rule to inherit color from the parent.
        Plain currentColor shapes only (no masks/clipPaths) so theming code can recolor it safely. -->
   <style>svg { color: #8a6b00; }</style>
-  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-    <!-- The conversation -->
-    <path stroke-width="56"
-          d="M316 200 H708 A140 140 0 0 1 848 340 V572 A140 140 0 0 1 708 712 H452 L292 836 L304 712
-             A140 140 0 0 1 176 572 V340 A140 140 0 0 1 316 200 Z"/>
-    <!-- The heartbeat: presence, in realtime -->
-    <path stroke-width="52" d="M272 462 H404 L452 352 L524 592 L584 412 L616 462 H752"/>
-  </g>
+  <!-- Small-size cut: a heavier, simpler heartbeat so it reads at 16px -->
+  <path fill="currentColor" fill-rule="evenodd" d="M265 831 L264 838 L266 845 L271 855 L277 860 L284 863 L291 864 L298 863 L308 859 L314 854 L407 740 L708 740 L726 739 L742 736 L758 732 L774 727 L786 721 L800 712 L813 703 L826 692 L837 680 L848 664 L857 650 L863 638 L869 619 L873 603 L875 590 L876 572 L876 339 L875 322 L873 309 L869 293 L864 277 L857 262 L848 248 L839 235 L828 222 L816 211 L800 200 L786 191 L774 185 L755 179 L739 175 L723 173 L708 172 L315 172 L298 173 L282 176 L266 180 L250 185 L236 193 L222 201 L208 211 L198 220 L187 232 L176 248 L167 262 L161 274 L155 293 L152 306 L149 322 L148 340 L148 572 L149 590 L152 606 L155 619 L161 638 L167 650 L176 664 L185 677 L196 690 L211 703 L222 711 L236 719 L253 728 L269 733 L283 737 Z M268 528 L253 526 L239 520 L227 511 L218 499 L212 485 L210 470 L212 455 L214 448 L222 435 L227 429 L239 420 L246 416 L260 412 L361 412 L420 297 L431 286 L437 281 L450 275 L458 273 L473 272 L488 275 L495 279 L507 287 L517 299 L523 313 L569 458 L576 443 L586 431 L598 420 L612 414 L628 412 L756 412 L764 412 L778 416 L791 424 L797 429 L806 441 L812 455 L814 462 L814 478 L812 485 L806 499 L802 505 L791 516 L778 524 L771 526 L756 528 L663 528 L604 643 L593 654 L587 659 L574 665 L566 667 L551 668 L544 667 L529 661 L517 653 L507 641 L501 627 L455 482 L448 497 L438 509 L426 520 L412 526 L396 528 Z"/>
 </svg>

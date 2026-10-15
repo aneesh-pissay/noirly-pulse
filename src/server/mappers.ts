@@ -1,3 +1,4 @@
+import { attachmentUrl } from "@/src/server/storage/attachment-url";
 import type { Types } from "mongoose";
 import type { ChannelVisibility, ConversationKind, MemberRole } from "@/src/core/models/enums";
 import type {
@@ -129,7 +130,8 @@ export function mapAttachment(doc: {
     filename: doc.filename,
     mime: doc.mime,
     sizeBytes: doc.sizeBytes,
-    url: doc.url,
+    // Always the access-checked route, never a stored public address.
+    url: attachmentUrl(doc.id),
     width: doc.width ?? null,
     height: doc.height ?? null,
   };

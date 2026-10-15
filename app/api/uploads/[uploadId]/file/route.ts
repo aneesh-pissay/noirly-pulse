@@ -3,6 +3,8 @@ import { Types } from "mongoose";
 import { ApiError, jsonError, requirePulseSession } from "@/src/server/api/http";
 import { withDb } from "@/src/server/db/mongodb";
 import { ConversationMember, Message, Upload } from "@/src/server/models";
+import { getObjectBuffer } from "@/src/server/storage/r2";
+import { uploadResponseHeaders } from "@/src/server/storage/served-type";
 
 type Params = { params: Promise<{ uploadId: string }> };
 
@@ -19,8 +21,11 @@ export async function GET(_request: Request, { params }: Params) {
       if (!upload) throw new ApiError(404, "not_found", "Upload not found");
       if (upload.userId.toString() === ctx.userId) return upload;
 
+      // Shared through a message that still exists, in a conversation the
+      // viewer is in. Deleting the message takes the file away from others.
       const message = await Message.findOne({
         "attachments.id": uploadId,
+        deletedAt: null,
       }).lean();
       if (!message) throw new ApiError(404, "not_found", "Upload not found");
       const member = await ConversationMember.findOne({
@@ -31,21 +36,13 @@ export async function GET(_request: Request, { params }: Params) {
       return upload;
     });
 
-    if (
-      file.url.startsWith("http://") ||
-      file.url.startsWith("https://") ||
-      file.storagePath.startsWith("r2:")
-    ) {
-      return Response.redirect(file.url, 302);
-    }
-
-    const bytes = await readFile(file.storagePath);
-    return new Response(bytes, {
-      headers: {
-        "content-type": file.mime,
-        "content-disposition": `inline; filename="${encodeURIComponent(file.filename)}"`,
-        "cache-control": "private, max-age=3600",
-      },
+    // Read the bytes here rather than redirecting to the bucket: a redirect
+    // would hand out a link that works for anyone, forever.
+    const bytes = file.storagePath.startsWith("r2:")
+      ? await getObjectBuffer(file.storagePath.slice(3))
+      : await readFile(file.storagePath);
+    return new Response(new Uint8Array(bytes), {
+      headers: uploadResponseHeaders(file.mime, file.filename),
     });
   } catch (error) {
     return jsonError(error);

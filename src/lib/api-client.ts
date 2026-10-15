@@ -32,6 +32,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!(init?.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
+  // Proves the request came from this app's own scripts (see proxy.ts).
+  headers.set("X-Noirly-CSRF", "1");
   const response = await fetch(path, { ...init, headers });
   const data = (await response.json().catch(() => ({}))) as T & ApiErrorBody;
   if (!response.ok) {

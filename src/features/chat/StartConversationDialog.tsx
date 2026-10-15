@@ -69,7 +69,7 @@ export function StartConversationDialog({ open, onClose, mode }: Props) {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search people by name or email"
+          placeholder="Name of someone you know here, or a full email"
           autoFocus
         />
         {mode === "group" ? (

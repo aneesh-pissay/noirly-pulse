@@ -1,7 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Types, type PipelineStage } from "mongoose";
-import { canWriteToR2, uploadBuffer } from "@/src/server/storage/r2";
+import { canWriteToR2, putObject } from "@/src/server/storage/r2";
+import { attachmentUrl } from "@/src/server/storage/attachment-url";
+import { isInlineImage, servedContentType } from "@/src/server/storage/served-type";
 import type { ChannelVisibility, MemberRole, NotificationKind } from "@/src/core/models/enums";
 import type {
   Attachment,
@@ -618,8 +620,19 @@ export function createMongoSyncProvider({ userId }: ProviderContext): PulseSyncP
         const query = q.trim();
         if (!query) return [];
         const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const users = await PulseUser.find({
-          _id: { $ne: oid(userId) },
+        // Search covers only people you already share a workspace or a
+        // conversation with. Anyone else is found by their exact email,
+        // so the directory can't be browsed for addresses.
+        const [workspaceIds, conversationIds] = await Promise.all([
+          WorkspaceMember.find({ userId: oid(userId) }).distinct("workspaceId"),
+          ConversationMember.find({ userId: oid(userId) }).distinct("conversationId"),
+        ]);
+        const [workspacePeers, conversationPeers] = await Promise.all([
+          WorkspaceMember.find({ workspaceId: { $in: workspaceIds } }).distinct("userId"),
+          ConversationMember.find({ conversationId: { $in: conversationIds } }).distinct("userId"),
+        ]);
+        const known = await PulseUser.find({
+          _id: { $in: [...workspacePeers, ...conversationPeers], $ne: oid(userId) },
           $or: [
             { displayName: { $regex: escaped, $options: "i" } },
             { email: { $regex: escaped, $options: "i" } },
@@ -627,7 +640,11 @@ export function createMongoSyncProvider({ userId }: ProviderContext): PulseSyncP
         })
           .limit(20)
           .lean();
-        return users.map(mapUser);
+        const exact = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query)
+          ? await PulseUser.findOne({ email: query.toLowerCase(), _id: { $ne: oid(userId) } }).lean()
+          : null;
+        const users = exact && !known.some((user) => user._id.equals(exact._id)) ? [exact, ...known] : known;
+        return users.slice(0, 20).map(mapUser);
       });
     },
 
@@ -1461,27 +1478,24 @@ export function createMongoSyncProvider({ userId }: ProviderContext): PulseSyncP
         if (file.sizeBytes > maxBytes) {
           throw new ApiError(400, "invalid_request", "File is too large");
         }
-        const kind = file.mime.startsWith("image/") ? "image" : "file";
+        // Only plain raster images are previewed; an SVG or anything else is a file.
+        const kind = isInlineImage(file.mime) ? "image" : "file";
         const id = new Types.ObjectId();
 
+        // Every attachment is served through the access-checked route; it never
+        // gets a public link. In R2 it sits under a private key (keep that
+        // bucket private), stored with a type that can't run as a page.
+        const url = attachmentUrl(id.toString());
         let storagePath: string;
-        let url: string;
-
         if (canWriteToR2()) {
-          const uploaded = await uploadBuffer(
-            file.body,
-            file.filename || "upload",
-            file.mime,
-            "pulse/uploads",
-          );
-          storagePath = `r2:${uploaded.key}`;
-          url = uploaded.publicUrl;
+          const key = `pulse/uploads/${id.toString()}`;
+          await putObject(key, file.body, servedContentType(file.mime));
+          storagePath = `r2:${key}`;
         } else {
           const dir = path.join(process.cwd(), ".uploads");
           await mkdir(dir, { recursive: true });
           storagePath = path.join(dir, id.toString());
           await writeFile(storagePath, file.body);
-          url = `/api/uploads/${id.toString()}/file`;
         }
 
         await Upload.create({
